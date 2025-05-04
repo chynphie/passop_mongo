@@ -120,6 +120,9 @@ const Manager = () => {
         },
         body: JSON.stringify({  id }),
       });
+      setPasswordArray(
+        passwordArray.filter((item) => item.id !== id)
+      );
       toast.info("Deleted", {
         position: "top-right",
         autoClose: 5000,
@@ -132,7 +135,6 @@ const Manager = () => {
       });
       // setPasswordArray(newPasswordArray);
       // localStorage.setItem("passwords", JSON.stringify(newPasswordArray));
-      console.log(newPasswordArray);
     }
   };
 
