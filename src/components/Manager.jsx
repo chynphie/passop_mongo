@@ -7,13 +7,16 @@ const Manager = () => {
   const passwordRef = useRef();
   const [form, setform] = useState({ site: "", username: "", password: "" });
   const [passwordArray, setPasswordArray] = useState([]);
-
+  
+  const getPasswords = async () => {
+    let res = await fetch("http://localhost:3000");
+    let passwords = await res.json();
+    console.log(passwords);
+    setPasswordArray(passwords);
+  }
   useEffect(() => {
-    let passwords = localStorage.getItem("passwords");
-    if (passwords) {
-      setPasswordArray(JSON.parse(passwords));
-    }
-  }, []);
+    getPasswords();
+  }, []); 
 
   const copyText = (text) => {
     toast.success("Copied", {
@@ -42,12 +45,29 @@ const Manager = () => {
     }
   };
 
-  const savePassword = () => {
+  const savePassword = async () => {
     if (
       form.site.length > 3 &&
       form.username.length > 3 &&
       form.password.length > 3
     ) {
+      // if id exists, delete it
+      if (form.id) {
+        await fetch("http://localhost:3000", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id: form.id }),
+        });
+      }
+      await fetch("http://localhost:3000", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...form, id: uuidv4() }),
+      })
       setPasswordArray([...passwordArray, { ...form, id: uuidv4() }]);
       localStorage.setItem(
         "passwords",
@@ -86,16 +106,32 @@ const Manager = () => {
     setPasswordArray(passwordArray.filter((item) => item.id !== id));
   };
 
-  const deletePassword = (id) => {
-    console.log(id);
-
-    const newPasswordArray = passwordArray.filter((item) => item.id !== id);
-    let confirm = window.confirm(
+  const deletePassword = async (id) => {
+    console.log(id);    
+    // const newPasswordArray = passwordArray.filter((item) => item.id !== id);
+    let c = window.confirm(
       "Are you sure you want to delete this password? This action cannot be undone."
     );
-    if (confirm) {
-      setPasswordArray(newPasswordArray);
-      localStorage.setItem("passwords", JSON.stringify(newPasswordArray));
+    if (c) {
+      let res = await fetch("http://localhost:3000", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({  id }),
+      });
+      toast.info("Deleted", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      // setPasswordArray(newPasswordArray);
+      // localStorage.setItem("passwords", JSON.stringify(newPasswordArray));
       console.log(newPasswordArray);
     }
   };

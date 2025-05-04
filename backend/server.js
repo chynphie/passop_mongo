@@ -31,19 +31,19 @@ app.get("/", async (req, res) => {
 
 // save a password
 app.post("/", async (req, res) => {
-    const password = req.body
-    const db = client.db(dbName);
-    const collection = db.collection("passwords");
-    const findResult = await collection.insertOne(password);
-    res.send({sucess:true, result: findResult});
+  const password = req.body;
+  const db = client.db(dbName);
+  const collection = db.collection("passwords");
+  const findResult = await collection.insertOne(password);
+  res.send({ sucess: true, result: findResult });
 });
 // delete a password
 app.delete("/", async (req, res) => {
-    const password = req.body
-    const db = client.db(dbName);
+  const password = req.body;
+  const db = client.db(dbName);
   const collection = db.collection("passwords");
   const findResult = await collection.deleteOne(password);
-  res.send({sucess:true, result: findResult});
+  res.send({ sucess: true, result: findResult });
 });
 
 app.listen(port, () => {
