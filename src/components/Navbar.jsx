@@ -11,11 +11,11 @@ const Navbar = () => {
         </div>
         <ul>
           <li className="flex gap-4 text-blue-100">
-            <a className="hover:font-bold" href="/">
-              Home
+            <a className="hover:font-bold" href="/login">
+              Login
             </a>
-            <a className="hover:font-bold" href="/about">
-              About
+            <a className="hover:font-bold" href="/Manage">
+              Manage password
             </a>
             <a className="hover:font-bold" href="/contact">
               Contact

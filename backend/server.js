@@ -3,7 +3,8 @@ const dotenv = require("dotenv");
 const { MongoClient } = require("mongodb");
 const bodyparser = require("body-parser");
 const cors = require("cors");
-// or as an es module:
+const authRoutes = require("./routes/authRoutes"); // Adjust the path as needed
+const mongoose = require('mongoose');
 
 dotenv.config();
 // Connection URL
@@ -16,11 +17,22 @@ const app = express();
 const port = 3000;
 app.use(bodyparser.json());
 app.use(cors());
+app.use('/api/auth', authRoutes);
 
 client.connect();
 
 console.log("Connected successfully to server");
 const db = client.db(dbName);
+
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/passwop', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => {
+  console.log('Connected to MongoDB');
+}).catch((err) => {
+  console.error('Failed to connect to MongoDB', err);
+});
 
 // get all the passwords
 app.get("/", async (req, res) => {

@@ -2,21 +2,23 @@ import React from "react";
 import { useRef, useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
+// set current component as route /ManagePassword
+
 const Manager = () => {
   const ref = useRef();
   const passwordRef = useRef();
-  const [form, setform] = useState({ site: "", username: "", password: "" });
+  const [form, setform] = useState({ site: "", email: "", password: "" });
   const [passwordArray, setPasswordArray] = useState([]);
-  
+
   const getPasswords = async () => {
     let res = await fetch("http://localhost:3000");
     let passwords = await res.json();
     console.log(passwords);
     setPasswordArray(passwords);
-  }
+  };
   useEffect(() => {
     getPasswords();
-  }, []); 
+  }, []);
 
   const copyText = (text) => {
     toast.success("Copied", {
@@ -48,7 +50,7 @@ const Manager = () => {
   const savePassword = async () => {
     if (
       form.site.length > 3 &&
-      form.username.length > 3 &&
+      form.email.length > 3 &&
       form.password.length > 3
     ) {
       // if id exists, delete it
@@ -67,13 +69,13 @@ const Manager = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ ...form, id: uuidv4() }),
-      })
+      });
       setPasswordArray([...passwordArray, { ...form, id: uuidv4() }]);
       localStorage.setItem(
         "passwords",
         JSON.stringify([...passwordArray, { ...form, id: uuidv4() }])
       );
-      setform({ site: "", username: "", password: "" });
+      setform({ site: "", email: "", password: "" });
       toast.success("Saved", {
         position: "top-right",
         autoClose: 5000,
@@ -107,7 +109,7 @@ const Manager = () => {
   };
 
   const deletePassword = async (id) => {
-    console.log(id);    
+    console.log(id);
     // const newPasswordArray = passwordArray.filter((item) => item.id !== id);
     let c = window.confirm(
       "Are you sure you want to delete this password? This action cannot be undone."
@@ -118,11 +120,9 @@ const Manager = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({  id }),
+        body: JSON.stringify({ id }),
       });
-      setPasswordArray(
-        passwordArray.filter((item) => item.id !== id)
-      );
+      setPasswordArray(passwordArray.filter((item) => item.id !== id));
       toast.info("Deleted", {
         position: "top-right",
         autoClose: 5000,
@@ -179,13 +179,13 @@ const Manager = () => {
           />
           <div className="flex flex-col md:flex-row w-full justify-between gap-7 ">
             <input
-              value={form.username}
-              placeholder="Enter username"
+              value={form.email}
+              placeholder="Enter email"
               onChange={handleChange}
               className="rounded-full border border-purple-600 w-full p-4 py-1"
               type="text"
-              name="username"
-              id="username"
+              name="email"
+              id="email"
             />
             <div className="relative">
               <input
@@ -232,9 +232,9 @@ const Manager = () => {
           {passwordArray.length != 0 && (
             <table className="table-auto w-full overflow-hidden mb-10">
               <thead className="bg-purple-900 text-white">
-                <tr className>
+                <tr>
                   <th className="py-2">Site</th>
-                  <th className="py-2">Username</th>
+                  <th className="py-2">email</th>
                   <th className="py-2">Password</th>
                   <th className="py-2">Actions</th>
                 </tr>
@@ -269,10 +269,10 @@ const Manager = () => {
                       </td>
                       <td className="justify-center py-2  text-center">
                         <div className="flex items-center justify-center">
-                          <span>{item.username}</span>
+                          <span>{item.email}</span>
                           <div
                             className="cursor-pointer size-7"
-                            onClick={() => copyText(item.username)}
+                            onClick={() => copyText(item.email)}
                           >
                             <lord-icon
                               style={{
