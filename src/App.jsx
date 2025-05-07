@@ -21,7 +21,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/manage" element={<Manager />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Login />} />
           <Route path="*" element={<div>Page Not Found</div>} />
         </Routes>
       </BrowserRouter>

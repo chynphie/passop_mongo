@@ -11,7 +11,7 @@ const Navbar = () => {
         </div>
         <ul>
           <li className="flex gap-4 text-blue-100">
-            <a className="hover:font-bold" href="/login">
+            <a className="hover:font-bold" href="/">
               Login
             </a>
             <a className="hover:font-bold" href="/Manage">
