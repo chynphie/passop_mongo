@@ -22,14 +22,19 @@ const Navbar = () => {
             </a>
           </li>
         </ul>
-        <button className="text-white hover:bg-purple-500 rounded-full flex my-1 mx-2 justify-between items-center">
+        <a
+          href="https://github.com/chynphie"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-white hover:bg-purple-500 rounded-full flex my-1 mx-2 justify-between items-center"
+        >
           <img
             className="invert p-1 w-10"
             src="src/assets/icons/github.png"
             alt="github logo"
           ></img>
           <span className="font-bold px-2">Github</span>
-        </button>
+        </a>
       </div>
     </nav>
   );
