@@ -7,8 +7,7 @@ const { deriveKey, decryptVault } = require("../services/cryptoService");
 
 // Function to register a new user
 exports.register = async (req, res) => {
-  const { websiteURL, email, masterPassword, encryptedVault, salt, iv } =
-    req.body;
+  const { email, masterPassword, encryptedVault, salt, iv } = req.body;
   try {
     // 1) Generate random salt for hashing
     const passwordSalt = crypto.randomBytes(16).toString("base64");
@@ -25,7 +24,6 @@ exports.register = async (req, res) => {
 
     // 3) Create user record
     const user = new User({
-      websiteURL,
       email,
       passwordHash,
       passwordSalt,
@@ -48,21 +46,17 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   console.log("Login request body:", req.body);
 
-  const { websiteURL, email, masterPassword } = req.body;
+  const { email, masterPassword } = req.body;
   console.log(
     "Login attempt for:",
     email,
     "on",
-    websiteURL,
-    "with password:",
     masterPassword
   );
 
   try {
     // 1) Look up user
-    console.log("Login attempt for:", email, "on", websiteURL);
-
-    const user = await User.findOne({ email, websiteURL });
+    const user = await User.findOne({ email });
     console.log("User found:", user);
 
     if (!user) {

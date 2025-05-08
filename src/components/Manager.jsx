@@ -178,7 +178,7 @@ const Manager = () => {
         theme="dark"
       />
       <div className="fixed inset-0 -z-10 h-full w-full bg-white [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)]"></div>
-      <div className="md:container md:p-0 md:py-16 md:mx-auto pt-3">
+     <div className="md:container md:p-0 md:py-16 md:mx-auto pt-3">
         {/* <h1 className="text-4xl font-bold text-center">
           <span className="text-purple-500">&lt;</span>
           <span>Pass</span>
@@ -402,7 +402,7 @@ const Manager = () => {
             </table>
           )}
         </div>
-      </div>
+      </div> 
     </>
   );
 };
