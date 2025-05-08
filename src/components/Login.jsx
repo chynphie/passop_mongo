@@ -1,5 +1,6 @@
 import React from "react";
 import { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { argon2id } from "hash-wasm";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -20,6 +21,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const idleTimer = useRef(null);
+  const navigate = useNavigate();
 
   const resetIdle = () => {
     clearTimeout(idleTimer.current);
@@ -112,39 +114,38 @@ const Login = () => {
 
     try {
       const res = await fetch("http://localhost:3000/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.message || "Failed to register");
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to register");
       }
 
       toast.success("Password Added", {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
       });
     } catch (error) {
       toast.error(error.message, {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
       });
     }
-    console.log(await res.json());
   };
 
   // Utility function to decode Base64 string to Uint8Array
@@ -201,8 +202,6 @@ const Login = () => {
       email: form.email,
       masterPassword: form.password,
     };
-    console.log("the sending login body is", body);
-
     try {
       const res = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
@@ -225,7 +224,6 @@ const Login = () => {
       const decrypted = await decryptAESGCM(encryptedVault, keyHex, iv);
       setVault(decrypted);
       // console.log("the decrypted vault is----", vault);
-
       toast.success("Login Success", {
         position: "top-right",
         autoClose: 3000,
@@ -237,7 +235,9 @@ const Login = () => {
         theme: "dark",
       });
       // resetIdle();
-      // console.log(vault);
+      console.log("logged in successfully");
+      localStorage.setItem("isLoggedIn", true);
+      navigate("/Manage");
     } catch (err) {
       console.error(err);
       setError(err.message);
@@ -256,8 +256,7 @@ const Login = () => {
       setLoading(false);
     }
   };
-
-  console.log("the vault is----", vault);
+  // console.log("the vault is----", vault);
 
   return (
     <>
