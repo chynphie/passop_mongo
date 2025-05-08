@@ -1,61 +1,96 @@
 // controllers/authController.js
 const User = require("../models/User"); // Assuming you have a User model
-// const bcrypt = require("bcrypt");
-// const jwt = require("jsonwebtoken");
-const argon2 = require('argon2');
+const argon2 = require("argon2");
+const crypto = require("crypto");
+
+const { deriveKey, decryptVault } = require("../services/cryptoService");
 
 // Function to register a new user
 exports.register = async (req, res) => {
-  const { websiteURL, email, password, encryptedVault, salt } = req.body;
-
+  const { websiteURL, email, masterPassword, encryptedVault, salt, iv } =
+    req.body;
   try {
-    const passwordHash = await argon2.hash(password, {
+    // 1) Generate random salt for hashing
+    const passwordSalt = crypto.randomBytes(16).toString("base64");
+    console.log("Password salt:", passwordSalt);
+
+    // 2) Hash the *master password* with Argon2id + salt
+    const passwordHash = await argon2.hash(masterPassword, {
       type: argon2.argon2id,
+      salt: Buffer.from(passwordSalt, "base64"),
       memoryCost: 2 ** 16,
       timeCost: 4,
-      parallelism: 2
+      parallelism: 1,
     });
 
+    // 3) Create user record
     const user = new User({
       websiteURL,
       email,
       passwordHash,
-      vault: encryptedVault,
-      salt // This is the salt used for vault encryption (not password hashing)
+      passwordSalt,
+      encryptedVault,
+      salt,
+      iv,
     });
-    console.log('the created user is----',user);
-    
+    console.log("User to be saved:", user);
     await user.save();
-    res.status(201).json({ message: 'User registered' });
-
+    res.status(201).json({ message: "User registered." });
   } catch (err) {
-    res.status(500).json({ error: 'Registration failed', details: err.message });
+    console.error("Registration error:", err);
+    res
+      .status(500)
+      .json({ error: "Registration failed", details: err.message });
   }
 };
 
 // Function to login user
 exports.login = async (req, res) => {
-  const {websiteURL, email, password } = req.body;
+  console.log("Login request body:", req.body);
+
+  const { websiteURL, email, masterPassword } = req.body;
+  console.log(
+    "Login attempt for:",
+    email,
+    "on",
+    websiteURL,
+    "with password:",
+    masterPassword
+  );
 
   try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    // 1) Look up user
+    console.log("Login attempt for:", email, "on", websiteURL);
 
-    const passwordMatches = await argon2.verify(user.passwordHash, password);
-    if (!passwordMatches) return res.status(401).json({ error: 'Invalid credentials' });
+    const user = await User.findOne({ email, websiteURL });
+    console.log("User found:", user);
 
-    // Auth success: send back vault + salt so client can decrypt
-    res.json({
-      vault: user.vault,
-      salt: user.salt // Needed on client to derive vault decryption key
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+    console.log("user passwordhash is", user.passwordHash);
+
+    // 2) Verify the master password
+    const valid = await argon2.verify(user.passwordHash, masterPassword, {
+      type: argon2.argon2id,
     });
+    console.log("Password verification result:", valid);
 
+    if (!valid) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // 3) Authentication succeeded — return vault info
+    res.json({
+      encryptedVault: user.encryptedVault, // your AES-GCM blob (Base64)
+      salt: user.salt,
+      iv: user.iv,
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Login failed', details: err.message });
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Login failed", details: err.message });
   }
-
 };
-
 // Function to logout user
 exports.logout = (req, res) => {
   // In a real-world scenario you might handle token invalidation or session management

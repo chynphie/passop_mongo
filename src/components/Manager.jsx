@@ -2,6 +2,7 @@ import React from "react";
 import { useRef, useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
+import Login from "./Login";
 // set current component as route /ManagePassword
 
 const Manager = () => {
@@ -9,6 +10,19 @@ const Manager = () => {
   const passwordRef = useRef();
   const [form, setform] = useState({ site: "", email: "", password: "" });
   const [passwordArray, setPasswordArray] = useState([]);
+  const [vault, setVault] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const idleTimer = useRef(null);
+
+  // Idle detection: clear vault after 5 minutes
+  const resetIdle = () => {
+    clearTimeout(idleTimer.current);
+    idleTimer.current = setTimeout(() => {
+      setVault(null);
+      alert('Session timed out. Please log in again.');
+    }, 1000 * 60 * 5);
+  };
 
   const getPasswords = async () => {
     let res = await fetch("http://localhost:3000/api/auth/users");
@@ -18,6 +32,13 @@ const Manager = () => {
   };
   useEffect(() => {
     getPasswords();
+    window.addEventListener('mousemove', resetIdle);
+    window.addEventListener('keydown', resetIdle);
+    return () => {
+      clearTimeout(idleTimer.current);
+      window.removeEventListener('mousemove', resetIdle);
+      window.removeEventListener('keydown', resetIdle);
+    };
   }, []);
 
   const copyText = (text) => {
@@ -158,7 +179,7 @@ const Manager = () => {
       />
       <div className="fixed inset-0 -z-10 h-full w-full bg-white [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)]"></div>
       <div className="md:container md:p-0 md:py-16 md:mx-auto pt-3">
-        <h1 className="text-4xl font-bold text-center">
+        {/* <h1 className="text-4xl font-bold text-center">
           <span className="text-purple-500">&lt;</span>
           <span>Pass</span>
           <span className="text-purple-500">OP/ &gt;</span>
@@ -225,7 +246,7 @@ const Manager = () => {
             ></lord-icon>
             Save Password
           </button>
-        </div>
+        </div> */}
         <div className="items-center justify-center flex flex-col p-4 text-black gap-8">
           <h2 className="font-bold text-3xl py-4">Your Passwords</h2>
           {passwordArray.length === 0 && <div> No passwords to show </div>}
