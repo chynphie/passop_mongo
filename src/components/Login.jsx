@@ -110,32 +110,38 @@ const Login = () => {
     };
     console.log("the body is----", body);
 
-    const res = await fetch("http://localhost:3000/api/auth/register", {
+    try {
+      const res = await fetch("http://localhost:3000/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      toast.error(res.error, {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
       });
-    } else {
+
+      if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Failed to register");
+      }
+
       toast.success("Password Added", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      });
+    } catch (error) {
+      toast.error(error.message, {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
       });
     }
     console.log(await res.json());
