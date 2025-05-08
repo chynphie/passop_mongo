@@ -1,6 +1,7 @@
 import React from "react";
 import { useRef, useState, useEffect } from "react";
 import { argon2id } from "hash-wasm";
+import { ToastContainer, toast } from "react-toastify";
 
 const Login = () => {
   const [form, setform] = useState({
@@ -18,7 +19,15 @@ const Login = () => {
   const [vault, setVault] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const idleTimer = useRef(null);
 
+  const resetIdle = () => {
+    clearTimeout(idleTimer.current);
+    idleTimer.current = setTimeout(() => {
+      setVault(null);
+      alert("Session timed out. Please log in again.");
+    }, 1000 * 60 * 5);
+  };
   const showPassword = () => {
     passwordRef.current.type = "text";
     console.log(ref.current.src);
@@ -82,7 +91,6 @@ const Login = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
     const vaultData = {
       website: form.websiteURL,
       credentials: { email: form.email, password: form.password },
@@ -107,7 +115,29 @@ const Login = () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-
+    if (!res.ok) {
+      toast.error(res.error, {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    } else {
+      toast.success("Registered", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    }
     console.log(await res.json());
   };
 
@@ -125,7 +155,9 @@ const Login = () => {
   // decryptAESGCM function
   async function decryptAESGCM(encryptedStr, keyHex, ivStr) {
     // 1) Turn your hex-string key into raw bytes
-    const keyBytes = Uint8Array.from(keyHex.match(/.{1,2}/g).map((b) => parseInt(b, 16))).slice(0, 32); // Ensure the key is 256 bits (32 bytes)
+    const keyBytes = Uint8Array.from(
+      keyHex.match(/.{1,2}/g).map((b) => parseInt(b, 16))
+    ).slice(0, 32); // Ensure the key is 256 bits (32 bytes)
     if (keyBytes.length !== 32) {
       throw new Error("Derived key must be 256 bits (32 bytes)");
     }
@@ -182,205 +214,245 @@ const Login = () => {
       // derive key
       const keyHex = await deriveKey(form.password, salt);
       console.log("the key is----", keyHex);
-      
+
       // decrypt vault
       const decrypted = await decryptAESGCM(encryptedVault, keyHex, iv);
       console.log("the decrypted vault is----", decrypted);
       setVault(decrypted);
-      // resetIdle();
+      console.log(!vault);
+
+      toast.success("Login Success", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      resetIdle();
     } catch (err) {
       console.error(err);
       setError(err.message);
+      toast.error(err.message, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
       setVault(null);
     } finally {
       setLoading(false);
     }
   };
 
-  if (!vault) {
+  if (true) {
     return (
-      <div
-        className="p-7 flex flex-col gap-4 w-full justifyCenter"
-        style={{ alignItems: "center" }}
-      >
-        <input
-          value={form.websiteURL}
-          placeholder="Enter website URL"
-          onChange={handleChange}
-          className="rounded-full border border-purple-600 w-70 p-4 py-1"
-          type="text"
-          name="websiteURL"
-          id="websiteURL"
+      <>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick={false}
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
         />
-        <input
-          value={form.email}
-          placeholder="Enter your email address"
-          onChange={handleChange}
-          className="rounded-full border border-purple-600 w-70 p-4 py-1"
-          type="text"
-          name="email"
-          id="email"
-        />
-        <div className="relative">
-          <input
-            ref={passwordRef}
-            value={form.password}
-            placeholder="Enter password"
-            onChange={handleChange}
-            className="rounded-full border border-purple-600 w-100 p-4 py-1"
-            type="password"
-            name="password"
-            id="password"
-          />
-          <span
-            className="absolute right-[3px] top-[0px] cursor-pointer"
-            onClick={showPassword}
-          >
-            <img
-              ref={ref}
-              className="p-1"
-              width={33}
-              src="src/assets/icons/slice13-256.webp"
-              alt="eye"
-            />
-          </span>
-        </div>
         <div
-          style={{ display: "flex", justifyContent: "alignItems", gap: "12px" }}
+          className="p-7 flex flex-col gap-4 w-full justifyCenter"
+          style={{ alignItems: "center" }}
         >
-          <button
-            className="flex text-white justify-center items-center gap-1 px-8 cursor-pointer
+          <input
+            value={form.websiteURL}
+            placeholder="Enter website URL"
+            onChange={handleChange}
+            className="rounded-full border border-purple-600 w-70 p-4 py-1"
+            type="text"
+            name="websiteURL"
+            id="websiteURL"
+          />
+          <input
+            value={form.email}
+            placeholder="Enter your email address"
+            onChange={handleChange}
+            className="rounded-full border border-purple-600 w-70 p-4 py-1"
+            type="text"
+            name="email"
+            id="email"
+          />
+          <div className="relative">
+            <input
+              ref={passwordRef}
+              value={form.password}
+              placeholder="Enter password"
+              onChange={handleChange}
+              className="rounded-full border border-purple-600 w-100 p-4 py-1"
+              type="password"
+              name="password"
+              id="password"
+            />
+            <span
+              className="absolute right-[3px] top-[0px] cursor-pointer"
+              onClick={showPassword}
+            >
+              <img
+                ref={ref}
+                className="p-1"
+                width={33}
+                src="src/assets/icons/slice13-256.webp"
+                alt="eye"
+              />
+            </span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "alignItems",
+              gap: "12px",
+            }}
+          >
+            <button
+              className="flex text-white justify-center items-center gap-1 px-8 cursor-pointer
              bg-purple-500 hover:bg-purple-300 hover:border-1 border-purple-950 rounded-full py-2 w-fit"
-            onClick={handleLogin}
-            type="submit"
-            name="submit"
-            id="submit"
-          >
-            <lord-icon
-              src="https://cdn.lordicon.com/kdduutaw.json"
-              trigger="hover"
-              stroke="bold"
-              style={{ width: "25px", height: "25px" }}
-            ></lord-icon>
-            Login
-          </button>
-          <button
-            className="flex text-white justify-center items-center gap-1 px-8 cursor-pointer
+              onClick={handleLogin}
+              type="submit"
+              name="submit"
+              id="submit"
+            >
+              <lord-icon
+                src="https://cdn.lordicon.com/kdduutaw.json"
+                trigger="hover"
+                stroke="bold"
+                style={{ width: "25px", height: "25px" }}
+              ></lord-icon>
+              Login
+            </button>
+            <button
+              className="flex text-white justify-center items-center gap-1 px-8 cursor-pointer
              bg-purple-500 hover:bg-purple-300 hover:border-1 border-purple-950 rounded-full py-2 w-fit"
-            onClick={handleRegister}
-            type="submit"
-            name="submit"
-            id="submit"
-          >
-            <lord-icon
-              src="https://cdn.lordicon.com/kdduutaw.json"
-              trigger="hover"
-              stroke="bold"
-              style={{ width: "25px", height: "25px" }}
-            ></lord-icon>
-            Register/Add
-          </button>
-          <button
-            className="flex text-white justify-center items-center gap-1 px-8 cursor-pointer
+              onClick={handleRegister}
+              type="submit"
+              name="submit"
+              id="submit"
+            >
+              <lord-icon
+                src="https://cdn.lordicon.com/kdduutaw.json"
+                trigger="hover"
+                stroke="bold"
+                style={{ width: "25px", height: "25px" }}
+              ></lord-icon>
+              Register/Add
+            </button>
+            <button
+              className="flex text-white justify-center items-center gap-1 px-8 cursor-pointer
              bg-purple-500 hover:bg-purple-300 hover:border-1 border-purple-950 rounded-full py-2 w-fit"
-            onClick={handleLogin}
-            type="submit"
-            name="submit"
-            id="submit"
-          >
-            <lord-icon
-              src="https://cdn.lordicon.com/kdduutaw.json"
-              trigger="hover"
-              stroke="bold"
-              style={{ width: "25px", height: "25px" }}
-            ></lord-icon>
-            Manage Password
-          </button>
-        </div>
-        <div className="mt-4 w-fit" style={{ width: "566px" }}>
-          <h2
-            className="text-lg font-bold mb-4"
-            style={{ display: "flex", justifyContent: "center" }}
-          >
-            Password-Strength Analytics
-          </h2>
-          <div className="flex flex-col gap-2">
-            <div className="flex justify-between">
-              <span>Strength:</span>
-              <div className="flex justify-between gap-2">
-                <span>
-                  {form.password.length < 6
-                    ? "Weak"
-                    : form.password.length < 10
-                    ? "Moderate"
-                    : "Strong"}
-                </span>
-                <div className="flex justify-center">
-                  {form.password.length < 6 && (
-                    <lord-icon
-                      src="https://cdn.lordicon.com/xlayapaf.json"
-                      trigger="hover"
-                      stroke="bold"
-                      colors="primary:#3a3347,secondary:#e83a30,tertiary:#b26836"
-                      style={{ width: "25px", height: "25px" }}
-                    ></lord-icon>
-                  )}
-                  {form.password.length >= 6 && form.password.length < 10 && (
-                    <lord-icon
-                      src="https://cdn.lordicon.com/xlayapaf.json"
-                      trigger="hover"
-                      stroke="bold"
-                      colors="primary:#3a3347,secondary:#e8b730,tertiary:#b26836"
-                      style={{ width: "25px", height: "25px" }}
-                    ></lord-icon>
-                  )}
-                  {form.password.length >= 10 && (
-                    <lord-icon
-                      src="https://cdn.lordicon.com/xlayapaf.json"
-                      trigger="hover"
-                      stroke="bold"
-                      colors="primary:#3a3347,secondary:#a5e830,tertiary:#b26836"
-                      style={{
-                        width: "25px",
-                        height: "25px",
-                        marginTop: "1px",
-                      }}
-                    ></lord-icon>
-                  )}
+              onClick={handleLogin}
+              type="submit"
+              name="submit"
+              id="submit"
+            >
+              <lord-icon
+                src="https://cdn.lordicon.com/kdduutaw.json"
+                trigger="hover"
+                stroke="bold"
+                style={{ width: "25px", height: "25px" }}
+              ></lord-icon>
+              Manage Password
+            </button>
+          </div>
+          <div className="mt-4 w-fit" style={{ width: "566px" }}>
+            <h2
+              className="text-lg font-bold mb-4"
+              style={{ display: "flex", justifyContent: "center" }}
+            >
+              Password-Strength Analytics
+            </h2>
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between">
+                <span>Strength:</span>
+                <div className="flex justify-between gap-2">
+                  <span>
+                    {form.password.length < 6
+                      ? "Weak"
+                      : form.password.length < 10
+                      ? "Moderate"
+                      : "Strong"}
+                  </span>
+                  <div className="flex justify-center">
+                    {form.password.length < 6 && (
+                      <lord-icon
+                        src="https://cdn.lordicon.com/xlayapaf.json"
+                        trigger="hover"
+                        stroke="bold"
+                        colors="primary:#3a3347,secondary:#e83a30,tertiary:#b26836"
+                        style={{ width: "25px", height: "25px" }}
+                      ></lord-icon>
+                    )}
+                    {form.password.length >= 6 && form.password.length < 10 && (
+                      <lord-icon
+                        src="https://cdn.lordicon.com/xlayapaf.json"
+                        trigger="hover"
+                        stroke="bold"
+                        colors="primary:#3a3347,secondary:#e8b730,tertiary:#b26836"
+                        style={{ width: "25px", height: "25px" }}
+                      ></lord-icon>
+                    )}
+                    {form.password.length >= 10 && (
+                      <lord-icon
+                        src="https://cdn.lordicon.com/xlayapaf.json"
+                        trigger="hover"
+                        stroke="bold"
+                        colors="primary:#3a3347,secondary:#a5e830,tertiary:#b26836"
+                        style={{
+                          width: "25px",
+                          height: "25px",
+                          marginTop: "1px",
+                        }}
+                      ></lord-icon>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex justify-between">
-              <span>Length:</span>
-              <span>{form.password.length}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Contains Numbers:</span>
-              <span
-                style={{
-                  textWeight: "bold",
-                  color: /\d/.test(form.password) ? "#30ba4a" : "#b00600",
-                }}
-              >
-                {/\d/.test(form.password) ? "Yes" : "No"}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Contains Special Characters:</span>
-              <span
-                style={{
-                  textWeight: "bold",
-                  color: /[!@#$%^&*(),.?":{}|<>]/.test(form.password)
-                    ? "#30ba4a"
-                    : "#b00600",
-                }}
-              >
-                {/[!@#$%^&*(),.?":{}|<>]/.test(form.password) ? "Yes" : "No"}
-              </span>
+              <div className="flex justify-between">
+                <span>Length:</span>
+                <span>{form.password.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Contains Numbers:</span>
+                <span
+                  style={{
+                    textWeight: "bold",
+                    color: /\d/.test(form.password) ? "#30ba4a" : "#b00600",
+                  }}
+                >
+                  {/\d/.test(form.password) ? "Yes" : "No"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Contains Special Characters:</span>
+                <span
+                  style={{
+                    textWeight: "bold",
+                    color: /[!@#$%^&*(),.?":{}|<>]/.test(form.password)
+                      ? "#30ba4a"
+                      : "#b00600",
+                  }}
+                >
+                  {/[!@#$%^&*(),.?":{}|<>]/.test(form.password) ? "Yes" : "No"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 };
