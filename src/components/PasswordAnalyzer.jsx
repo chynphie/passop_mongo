@@ -29,6 +29,7 @@ export function PasswordAnalyzer({ password }) {
     // entropy = log2(pool^length)
     const e = password.length * Math.log2(pool || 1);
     setEntropy(Math.round(e * 100) / 100);
+    localStorage.setItem('passwordEntropy', e.toString());
   }, [password]);
 
   // 2) Debounced breach check
@@ -40,7 +41,7 @@ export function PasswordAnalyzer({ password }) {
       const suffix = hash.slice(5);
       try {
         const res = await axios.get(`https://api.pwnedpasswords.com/range/${prefix}`);
-        console.log(res);
+        // console.log(res);
         
         // response is list of “SUFFIX:COUNT”
         const match = res.data

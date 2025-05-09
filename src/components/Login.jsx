@@ -11,6 +11,7 @@ import {
   encryptVault,
 } from "../utils/crypto";
 import { PasswordAnalyzer } from "./PasswordAnalyzer";
+import { generatePassphrase, wordsRequired } from "../utils/PasswordGenerator";
 
 const Login = () => {
   const [form, setform] = useState({
@@ -30,6 +31,19 @@ const Login = () => {
   const [error, setError] = useState("");
   const idleTimer = useRef(null);
   const navigate = useNavigate();
+
+  const [entropy, setEntropy] = useState("");
+  const [passphrase, setPassphrase] = useState("");
+
+  function handleGenerate() {
+    console.log(entropy);
+    setPassphrase(generatePassphrase(entropy, { separator: " " }));
+    console.log("the passphrase is ", passphrase);
+  }
+  function checkEntropyVal() {
+    console.log(localStorage.getItem("passwordEntropy"));
+    setEntropy(localStorage.getItem("passwordEntropy"));
+  }
 
   const resetIdle = () => {
     clearTimeout(idleTimer.current);
@@ -73,11 +87,7 @@ const Login = () => {
     console.log("the body is----", body);
 
     try {
-      const res = await fetch("http://localhost:3000/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+      <PasswordAnalyzer password={form.password} entropy={entropy} />;
 
       if (!res.ok) {
         const errorData = await res.json();
@@ -174,6 +184,10 @@ const Login = () => {
   };
   // console.log("the vault is----", vault);
 
+  useEffect(() => {
+    checkEntropyVal();
+  }, [entropy]);
+
   return (
     <>
       <ToastContainer
@@ -195,7 +209,10 @@ const Login = () => {
         <input
           value={form.email}
           placeholder="Enter your email address"
-          onChange={handleChange}
+          onChange={(e) => {
+            handleChange(e);
+            checkEntropyVal();
+          }}
           className="rounded-full border border-purple-600 w-70 p-4 py-1"
           type="text"
           name="email"
@@ -206,7 +223,10 @@ const Login = () => {
             ref={passwordRef}
             value={form.password}
             placeholder="Enter password"
-            onChange={handleChange}
+            onChange={(e) => {
+              handleChange(e);
+              checkEntropyVal();
+            }}
             className="rounded-full border border-purple-600 w-100 p-4 py-1"
             type="password"
             name="password"
@@ -382,6 +402,17 @@ const Login = () => {
             </div>
           </div>
           <PasswordAnalyzer password={form.password} />
+          <div className="mt-5">
+            <p>Words needed: {wordsRequired(entropy)}</p>
+            <p>Your passphrase: {passphrase}</p>
+            <button
+              className="flex text-white justify-center items-center gap-1 px-8 cursor-pointer
+       bg-purple-500 hover:bg-purple-300 hover:border-1 border-purple-950 rounded-full py-2 w-fit"
+              onClick={handleGenerate}
+            >
+              generate
+            </button>
+          </div>
         </div>
       </div>
     </>
