@@ -23,7 +23,9 @@ exports.register = async (req, res) => {
     });
 
     // 3) Create user record
+    const userId = crypto.randomUUID(); // Generate a unique user ID
     const user = new User({
+      userId,
       email,
       passwordHash,
       passwordSalt,
@@ -76,6 +78,7 @@ exports.login = async (req, res) => {
 
     // 3) Authentication succeeded — return vault info
     res.json({
+      userId: user.userId,
       encryptedVault: user.encryptedVault, // your AES-GCM blob (Base64)
       salt: user.salt,
       iv: user.iv,
@@ -108,13 +111,17 @@ exports.profile = async (req, res) => {
 };
 
 // Function to get all users
-exports.getAllUsers = async (req, res) => {
+exports.getPasswordByUserId = async (req, res) => {
+  const { userId } = req.params;
   try {
-    const users = await User.find();
-    res.status(200).json(users);
+    const user = await User.findOne({ userId })
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Failed to fetch users", error: error.message });
+      .json({ message: "Failed to fetch user password", error: error.message });
   }
 };

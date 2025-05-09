@@ -1,6 +1,7 @@
 // models/User.js
 const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
+  userId: { type: String, unique: true, required: true }, // Unique identifier for the user
   // websiteURL: { type: String, required: true },
   email: { type: String, unique: true },
   passwordHash: { type: String, required: true }, // Argon2id hash

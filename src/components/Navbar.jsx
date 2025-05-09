@@ -23,7 +23,7 @@ const Navbar = () => {
           </li>
         </ul>
         <a
-          href="https://github.com/chynphie"
+          href="https://github.com/chynphie/passop_mongo"
           target="_blank"
           rel="noopener noreferrer"
           className="text-white hover:bg-purple-500 rounded-full flex my-1 mx-2 justify-between items-center"

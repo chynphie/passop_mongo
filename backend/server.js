@@ -4,6 +4,7 @@ const { MongoClient } = require("mongodb");
 const bodyparser = require("body-parser");
 const cors = require("cors");
 const authRoutes = require("./routes/authRoutes"); // Adjust the path as needed
+const vaultRoutes = require("./routes/vaultRoutes"); // Adjust the path as needed
 const mongoose = require('mongoose');
 
 dotenv.config();
@@ -18,6 +19,7 @@ const port = 3000;
 app.use(bodyparser.json());
 app.use(cors());
 app.use('/api/auth', authRoutes);
+app.use('/api/vault', vaultRoutes);
 
 client.connect();
 

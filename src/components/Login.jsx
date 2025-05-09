@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { argon2id } from "hash-wasm";
 import { ToastContainer, toast } from "react-toastify";
+import { deriveKey, decryptAESGCM, generateSalt, decodeToBytes, encryptVault } from '../utils/crypto';
 
 const Login = () => {
   const [form, setform] = useState({
@@ -41,54 +42,6 @@ const Login = () => {
       ref.current.src = "src/assets/icons/eye-512.webp";
       passwordRef.current.type = "text";
     }
-  };
-
-  // 1. Generate random salt (128-bit)
-  const generateSalt = (length = 16) => {
-    const array = new Uint8Array(length);
-    window.crypto.getRandomValues(array);
-    return btoa(String.fromCharCode(...array)); // Base64 encoded salt
-  };
-
-  // 2. Derive encryption key using Argon2id
-  const deriveKey = async (password, saltBase64) => {
-    const saltBytes = Uint8Array.from(atob(saltBase64), (c) => c.charCodeAt(0));
-    const hashHex = await argon2id({
-      password, // string
-      iterations: 3, // time cost
-      salt: saltBytes, // Uint8Array
-      memorySize: 1 << 16, // 64 MiB
-      parallelism: 1, // p=1
-      hashLength: 32, // 32 bytes = 256 bits
-    });
-    return hashHex; // hex string
-  };
-
-  // 3. Encrypt vault data using AES-GCM
-  const encryptVault = async (vaultObj, keyHex) => {
-    const keyBuffer = new Uint8Array(
-      keyHex.match(/.{1,2}/g).map((b) => parseInt(b, 16))
-    ).slice(0, 32); // Ensure the key is 256 bits (32 bytes)
-    const cryptoKey = await crypto.subtle.importKey(
-      "raw",
-      keyBuffer,
-      "AES-GCM",
-      false,
-      ["encrypt"]
-    );
-
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const encoded = new TextEncoder().encode(JSON.stringify(vaultObj));
-    const encrypted = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv },
-      cryptoKey,
-      encoded
-    );
-
-    return {
-      encryptedVault: btoa(String.fromCharCode(...new Uint8Array(encrypted))),
-      iv: btoa(String.fromCharCode(...iv)),
-    };
   };
 
   const handleRegister = async (e) => {
@@ -148,50 +101,6 @@ const Login = () => {
     }
   };
 
-  // Utility function to decode Base64 string to Uint8Array
-  function decodeToBytes(base64Str) {
-    const binaryStr = atob(base64Str);
-    const len = binaryStr.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryStr.charCodeAt(i);
-    }
-    return bytes;
-  }
-
-  // decryptAESGCM function
-  async function decryptAESGCM(encryptedStr, keyHex, ivStr) {
-    // 1) Turn your hex-string key into raw bytes
-    const keyBytes = Uint8Array.from(
-      keyHex.match(/.{1,2}/g).map((b) => parseInt(b, 16))
-    ).slice(0, 32); // Ensure the key is 256 bits (32 bytes)
-    if (keyBytes.length !== 32) {
-      throw new Error("Derived key must be 256 bits (32 bytes)");
-    }
-    const cryptoKey = await crypto.subtle.importKey(
-      "raw",
-      keyBytes.buffer,
-      "AES-GCM",
-      false,
-      ["decrypt"]
-    );
-
-    // 2) Decode the IV (initialization vector) and ciphertext
-    const ivBytes = decodeToBytes(ivStr); // Uint8Array
-    const dataBytes = decodeToBytes(encryptedStr); // Uint8Array
-
-    // 3) Perform the actual AES-GCM decryption
-    const plainBuffer = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: ivBytes },
-      cryptoKey,
-      dataBytes
-    );
-
-    // 4) Convert decrypted bytes back into a JS object
-    const json = new TextDecoder().decode(plainBuffer);
-    return JSON.parse(json);
-  }
-
   // Login + vault fetch + decryption
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -214,7 +123,7 @@ const Login = () => {
       if (!res.ok) {
         throw new Error(data.message || "Login failed");
       }
-
+      localStorage.setItem("userId", data.userId);
       const { encryptedVault, salt, iv } = data;
       // derive key
       const keyHex = await deriveKey(form.password, salt);
@@ -222,8 +131,8 @@ const Login = () => {
 
       // decrypt vault
       const decrypted = await decryptAESGCM(encryptedVault, keyHex, iv);
+      console.log("the decrypted vault is----", decrypted);
       setVault(decrypted);
-      // console.log("the decrypted vault is----", vault);
       toast.success("Login Success", {
         position: "top-right",
         autoClose: 3000,
