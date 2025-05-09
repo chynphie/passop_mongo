@@ -3,7 +3,14 @@ import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { argon2id } from "hash-wasm";
 import { ToastContainer, toast } from "react-toastify";
-import { deriveKey, decryptAESGCM, generateSalt, decodeToBytes, encryptVault } from '../utils/crypto';
+import {
+  deriveKey,
+  decryptAESGCM,
+  generateSalt,
+  decodeToBytes,
+  encryptVault,
+} from "../utils/crypto";
+import { PasswordAnalyzer } from "./PasswordAnalyzer";
 
 const Login = () => {
   const [form, setform] = useState({
@@ -290,88 +297,91 @@ const Login = () => {
             Login + Manage Password
           </button>
         </div>
-        <div className="mt-4 w-fit" style={{ width: "566px" }}>
-          <h2
-            className="text-lg font-bold mb-4"
-            style={{ display: "flex", justifyContent: "center" }}
-          >
-            Password-Strength Analytics
-          </h2>
-          <div className="flex flex-col gap-2">
-            <div className="flex justify-between">
-              <span>Strength:</span>
-              <div className="flex justify-between gap-2">
-                <span>
-                  {form.password.length < 6
-                    ? "Weak"
-                    : form.password.length < 10
-                    ? "Moderate"
-                    : "Strong"}
-                </span>
-                <div className="flex justify-center">
-                  {form.password.length < 6 && (
-                    <lord-icon
-                      src="https://cdn.lordicon.com/xlayapaf.json"
-                      trigger="hover"
-                      stroke="bold"
-                      colors="primary:#3a3347,secondary:#e83a30,tertiary:#b26836"
-                      style={{ width: "25px", height: "25px" }}
-                    ></lord-icon>
-                  )}
-                  {form.password.length >= 6 && form.password.length < 10 && (
-                    <lord-icon
-                      src="https://cdn.lordicon.com/xlayapaf.json"
-                      trigger="hover"
-                      stroke="bold"
-                      colors="primary:#3a3347,secondary:#e8b730,tertiary:#b26836"
-                      style={{ width: "25px", height: "25px" }}
-                    ></lord-icon>
-                  )}
-                  {form.password.length >= 10 && (
-                    <lord-icon
-                      src="https://cdn.lordicon.com/xlayapaf.json"
-                      trigger="hover"
-                      stroke="bold"
-                      colors="primary:#3a3347,secondary:#a5e830,tertiary:#b26836"
-                      style={{
-                        width: "25px",
-                        height: "25px",
-                        marginTop: "1px",
-                      }}
-                    ></lord-icon>
-                  )}
+        <div>
+          <div className="mt-4 w-fit" style={{ width: "566px" }}>
+            <h2
+              className="text-lg font-bold mb-4"
+              style={{ display: "flex", justifyContent: "center" }}
+            >
+              Password-Strength Analytics
+            </h2>
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between">
+                <span>Strength:</span>
+                <div className="flex justify-between gap-2">
+                  <span>
+                    {form.password.length < 6
+                      ? "Weak"
+                      : form.password.length < 10
+                      ? "Moderate"
+                      : "Strong"}
+                  </span>
+                  <div className="flex justify-center">
+                    {form.password.length < 6 && (
+                      <lord-icon
+                        src="https://cdn.lordicon.com/xlayapaf.json"
+                        trigger="hover"
+                        stroke="bold"
+                        colors="primary:#3a3347,secondary:#e83a30,tertiary:#b26836"
+                        style={{ width: "25px", height: "25px" }}
+                      ></lord-icon>
+                    )}
+                    {form.password.length >= 6 && form.password.length < 10 && (
+                      <lord-icon
+                        src="https://cdn.lordicon.com/xlayapaf.json"
+                        trigger="hover"
+                        stroke="bold"
+                        colors="primary:#3a3347,secondary:#e8b730,tertiary:#b26836"
+                        style={{ width: "25px", height: "25px" }}
+                      ></lord-icon>
+                    )}
+                    {form.password.length >= 10 && (
+                      <lord-icon
+                        src="https://cdn.lordicon.com/xlayapaf.json"
+                        trigger="hover"
+                        stroke="bold"
+                        colors="primary:#3a3347,secondary:#a5e830,tertiary:#b26836"
+                        style={{
+                          width: "25px",
+                          height: "25px",
+                          marginTop: "1px",
+                        }}
+                      ></lord-icon>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex justify-between">
-              <span>Length:</span>
-              <span>{form.password.length}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Contains Numbers:</span>
-              <span
-                style={{
-                  textWeight: "bold",
-                  color: /\d/.test(form.password) ? "#30ba4a" : "#b00600",
-                }}
-              >
-                {/\d/.test(form.password) ? "Yes" : "No"}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Contains Special Characters:</span>
-              <span
-                style={{
-                  textWeight: "bold",
-                  color: /[!@#$%^&*(),.?":{}|<>]/.test(form.password)
-                    ? "#30ba4a"
-                    : "#b00600",
-                }}
-              >
-                {/[!@#$%^&*(),.?":{}|<>]/.test(form.password) ? "Yes" : "No"}
-              </span>
+              <div className="flex justify-between">
+                <span>Length:</span>
+                <span>{form.password.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Contains Numbers:</span>
+                <span
+                  style={{
+                    textWeight: "bold",
+                    color: /\d/.test(form.password) ? "#30ba4a" : "#b00600",
+                  }}
+                >
+                  {/\d/.test(form.password) ? "Yes" : "No"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Contains Special Characters:</span>
+                <span
+                  style={{
+                    textWeight: "bold",
+                    color: /[!@#$%^&*(),.?":{}|<>]/.test(form.password)
+                      ? "#30ba4a"
+                      : "#b00600",
+                  }}
+                >
+                  {/[!@#$%^&*(),.?":{}|<>]/.test(form.password) ? "Yes" : "No"}
+                </span>
+              </div>
             </div>
           </div>
+          <PasswordAnalyzer password={form.password} />
         </div>
       </div>
     </>

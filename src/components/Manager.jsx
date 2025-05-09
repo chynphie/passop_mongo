@@ -32,7 +32,6 @@ const Manager = () => {
     console.log("decryptedList", decryptedList);
     const updatedPasswordArray = decryptedList.flatMap(e => e.credentials);
     setPasswordArray(updatedPasswordArray);
-    console.log("passwordArray", passwordArray);
   };
 
   const getPasswords = async () => {
