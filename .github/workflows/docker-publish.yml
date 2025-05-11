@@ -119,6 +119,6 @@ jobs:
             echo "--- Removing existing container ---"
             docker rm my_container 
             echo "--- Starting new container ---"
+            docker run -d --name my_container -p 3000:80 ghcr.io/tatticoder/terraform-get-time:main
            # Adjust ports (-p host:container) 
            # Add any necessary environment variables (-e)
-            docker run -d --name my_container -p 3000:80 ghcr.io/tatticoder/terraform-get-time:main
