@@ -88,7 +88,13 @@ const Login = () => {
 
     try {
       <PasswordAnalyzer password={form.password} entropy={entropy} />;
-
+      const res = await fetch("http://localhost:3000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      console.log("the data is----", data);
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || "Failed to register");
