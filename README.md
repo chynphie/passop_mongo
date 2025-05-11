@@ -29,22 +29,13 @@ git clone https://github.com/chynphie/passop_mongo.git
 cd passop_mongo
 ```
 
-### 2. Set Environment Variables
-Create a .env file in the root with the following:
-
-```bash
-MONGO_URI=<your_mongodb_uri>
-JWT_SECRET=<your_jwt_secret>
-ENCRYPTION_KEY=<your_aes_gcm_key>
-HIBP_API_KEY=<your_hibp_api_key> (optional)
-```
-### 3. Run Backend
+### 2. Run Backend
 ```bash
 cd backend
 npm install
 npm run dev
 ```
-### 4. Run Frontend
+### 3. Run Frontend
 ```bash
 cd frontend
 npm install
