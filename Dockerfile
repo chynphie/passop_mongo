@@ -1,6 +1,6 @@
 # ---------- 1) Build Frontend ---------- 
 FROM node:18-alpine AS frontend-build
-WORKDIR /app
+WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm ci
 COPY frontend/ ./
