@@ -4,10 +4,9 @@ FROM node:18-alpine AS frontend-build
 WORKDIR /app/frontend
 
 # Install Debian build tools needed by many JS toolchains
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    build-essential python3 git && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk update && \
+    apk add --no-cache \
+    build-base python3 git
 
 # Copy only package files and install deps
 COPY frontend/package*.json ./
