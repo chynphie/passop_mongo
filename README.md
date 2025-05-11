@@ -17,7 +17,7 @@ A full-stack password manager built with React, Express.js, and MongoDB, featuri
 
 - **Frontend:** React, Tailwind CSS
 - **Backend:** Express.js, Node.js
-- **Database:** MongoDB (or Cosmos DB on Azure)
+- **Database:** MongoDB
 - **Security:** AES-GCM, Argon2id, crypto, HaveIBeenPwned API
 - **DevOps:** Docker, GitHub Actions, Azure App Services, Azure Key Vault
 
