@@ -1,5 +1,5 @@
 # ---------- 1) Build Frontend (Debian-based) ----------
-FROM node:18-slim AS frontend-build
+FROM node:14-alpine
 
 WORKDIR /app/frontend
 
