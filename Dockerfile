@@ -7,16 +7,27 @@ COPY frontend/ .
 RUN npm run build  
 
 # 2. Build Stage for Backend (Express + Python)
-FROM node:18-alpine AS backend-builder  
-WORKDIR /app/backend  
-COPY backend/package*.json ./  
-RUN npm ci  
+FROM node:18-alpine AS backend-builder
+WORKDIR /app/backend
+
+# 1. Install Python, pip, and build deps
+RUN apk add --no-cache \
+    python3 \
+    py3-pip \
+    python3-dev \
+    build-base \
+    libffi-dev \
+    openssl-dev
+
+# 2. Upgrade pip and install Python packages
+COPY backend/requirements.txt .
+RUN pip3 install --upgrade pip \
+    && pip3 install --no-cache-dir -r requirements.txt
+
+# 3. Copy the rest of your backend code
 COPY backend/ .  
-# Install Python dependencies for security modules
-RUN apk add --no-cache python3 py3-pip  
-COPY backend/requirements.txt .  
-RUN pip3 install --no-cache-dir -r requirements.txt  
-RUN npm run build  
+RUN npm ci && npm run build
+
 
 # 3. Final Production Image
 FROM node:18-alpine  
