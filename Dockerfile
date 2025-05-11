@@ -6,7 +6,7 @@ WORKDIR /app/frontend
 # Install Debian build tools needed by many JS toolchains
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      build-essential python3 && \
+    build-essential python3 && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy only package files and install deps
