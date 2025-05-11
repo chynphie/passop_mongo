@@ -42,6 +42,12 @@ npm install
 npm start
 ```
 
+### User Interface:
+<img width="1762" alt="image" src="https://github.com/user-attachments/assets/d690aac6-35a9-4e6f-a29b-84dcd180b0b4" />
+<img width="2005" alt="image" src="https://github.com/user-attachments/assets/47ea65a4-9944-4b4a-953c-9b1d6d8ec5d2" />
+
+
+
 ## 🧪 Testing & CI/CD
 - Automated linting and test scripts run on every push via GitHub Actions.
 - Docker containers for staging and production environments.
