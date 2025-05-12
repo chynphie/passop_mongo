@@ -32,17 +32,18 @@ cd passop_mongo
 ### 2. Run Backend
 ```bash
 cd backend
-npm install
-npm run dev
+npm init
+npm install express
+node server.js
 ```
 ### 3. Run Frontend
 ```bash
 cd frontend
 npm install
-npm start
+npm run dev
 ```
 
-### User Interface:
+### 📸User Interface:
 <img width="1762" alt="image" src="https://github.com/user-attachments/assets/d690aac6-35a9-4e6f-a29b-84dcd180b0b4" />
 <img width="2005" alt="image" src="https://github.com/user-attachments/assets/47ea65a4-9944-4b4a-953c-9b1d6d8ec5d2" />
 
@@ -57,10 +58,3 @@ npm start
 - Monte Carlo simulation to estimate brute-force compromise probability
 - OAuth2 integration for third-party login (e.g., Google)
 - Multi-device synchronization and biometric login
-
-## 🧠 Inspiration
-This project was built to explore real-world secure storage systems and apply coursework in:
-- Cryptography
-- -Combinatorics
-- Probability and simulation
-- Full-stack web development
